@@ -37,15 +37,22 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Load Models
-models = {
-    'diabetes': pickle.load(open(r"C:\Users\sripal\AICTE Project\best_diabetes_model.sav", 'rb')),
-    'heart_disease': pickle.load(open(r"C:\Users\sripal\AICTE Project\heart_disease_model.sav", 'rb')),
-    'parkinsons': pickle.load(open(r"C:\Users\sripal\AICTE Project\parkinsons_model.sav", 'rb')),
-    'lung_cancer': pickle.load(open(r"C:\Users\sripal\AICTE Project\lungs_disease_model.sav", 'rb')),
-    'thyroid': pickle.load(open(r"C:\Users\sripal\AICTE Project\Thyroid_model.sav", 'rb'))
-}
+import os
 
+def load_model(filename):
+    """Load a model file safely."""
+    if not os.path.exists(filename):
+        st.error(f"❌ Model file '{filename}' not found! Please check your GitHub repository.")
+        st.stop()
+    return pickle.load(open(filename, 'rb'))
+
+models = {
+    'diabetes': load_model("best_diabetes_model.sav"),
+    'heart_disease': load_model("heart_disease_model.sav"),
+    'parkinsons': load_model("parkinsons_model.sav"),
+    'lung_cancer': load_model("lungs_disease_model.sav"),
+    'thyroid': load_model("Thyroid_model.sav")
+}
 # Sidebar for Navigation
 with st.sidebar:
     selected = option_menu(
