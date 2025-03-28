@@ -38,14 +38,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Load models
 def load_model(filename):
-    """Load a model file safely."""
     if not os.path.exists(filename):
         st.error(f"❌ Model file '{filename}' not found! Please check your repository.")
         st.stop()
     return pickle.load(open(filename, 'rb'))
 
-# Load models
 models = {
     'diabetes': load_model("best_diabetes_model.sav"),
     'heart_disease': load_model("heart_disease_model.sav"),
@@ -64,13 +63,13 @@ with st.sidebar:
         default_index=0,
     )
 
+# Function for user inputs
 def user_input(label, key, type="number"):
     if type == "toggle":
         return int(st.toggle(label, key=key))
-    elif type == "slider":
-        return int(st.slider(label, 0, 100, step=1, key=key))
     return float(st.number_input(label, step=1.0, key=key))
 
+# Function to make predictions
 def make_prediction(model, features):
     try:
         input_data = np.array(features).reshape(1, -1)
@@ -80,7 +79,7 @@ def make_prediction(model, features):
         st.error(f"Prediction error: {str(e)}")
         return None
 
-# Diabetes Prediction
+# Disease Prediction Sections
 if selected == "Diabetes":
     st.header("Diabetes Prediction")
     features = [
@@ -97,7 +96,6 @@ if selected == "Diabetes":
         result = make_prediction(models['diabetes'], features)
         st.success("Diabetic" if result == 1 else "Not Diabetic")
 
-# Heart Disease Prediction
 elif selected == "Heart Disease":
     st.header("Heart Disease Prediction")
     features = [
@@ -119,7 +117,6 @@ elif selected == "Heart Disease":
         result = make_prediction(models['heart_disease'], features)
         st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
 
-# Parkinson's Prediction
 elif selected == "Parkinson's":
     st.header("Parkinson's Disease Prediction")
     features = [
@@ -135,7 +132,6 @@ elif selected == "Parkinson's":
         result = make_prediction(models['parkinsons'], features)
         st.success("Parkinson's Detected" if result == 1 else "No Parkinson's")
 
-# Lung Cancer Prediction
 elif selected == "Lung Cancer":
     st.header("Lung Cancer Prediction")
     features = [
@@ -150,7 +146,6 @@ elif selected == "Lung Cancer":
         result = make_prediction(models['lung_cancer'], features)
         st.success("Lung Cancer Detected" if result == 1 else "No Lung Cancer")
 
-# Thyroid Prediction
 elif selected == "Thyroid":
     st.header("Thyroid Disease Prediction")
     features = [
