@@ -5,7 +5,7 @@ from streamlit_option_menu import option_menu
 import os
 
 # Page Configurations
-st.set_page_config(page_title="Disease Prediction", page_icon="⚕️", layout="wide")
+st.set_page_config(page_title="Disease Prediction", page_icon="\u2695\ufe0f", layout="wide")
 
 # Hide Streamlit branding
 st.markdown(
@@ -70,6 +70,16 @@ def user_input(label, key, type="number"):
         return int(st.slider(label, 0, 100, step=1, key=key))
     return float(st.number_input(label, step=1.0, key=key))
 
+def make_prediction(model, features):
+    try:
+        input_data = np.array(features).reshape(1, -1)
+        st.write(f"Input Shape: {input_data.shape}")  # Debugging
+        prediction = model.predict(input_data)
+        return prediction[0]
+    except Exception as e:
+        st.error(f"Prediction error: {str(e)}")
+        return None
+
 if selected == "Diabetes":
     st.header("Diabetes Prediction")
     col1, col2 = st.columns(2)
@@ -85,9 +95,9 @@ if selected == "Diabetes":
         Age = user_input("Age", "Age", "slider")
     
     if st.button("Check Diabetes"):
-        prediction = models['diabetes'].predict(np.array([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]]))
-        result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
-        st.success(result)
+        result = make_prediction(models['diabetes'], [Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age])
+        if result is not None:
+            st.success("Diabetic" if result == 1 else "Not Diabetic")
 
 elif selected == "Heart Disease":
     st.header("Heart Disease Prediction")
@@ -104,39 +114,8 @@ elif selected == "Heart Disease":
         exang = user_input("Exercise Induced Angina", "exang", "toggle")
     
     if st.button("Check Heart Disease"):
-        prediction = models['heart_disease'].predict(np.array([[age, sex, cp, trestbps, chol, fbs, thalach, exang]]))
-        result = "Heart Disease Detected" if prediction[0] == 1 else "No Heart Disease"
-        st.success(result)
-
-elif selected == "Parkinson's":
-    st.header("Parkinson's Disease Prediction")
-    fo = user_input("MDVP:Fo(Hz)", "fo")
-    fhi = user_input("MDVP:Fhi(Hz)", "fhi")
-    flo = user_input("MDVP:Flo(Hz)", "flo")
-    jitter = user_input("MDVP:Jitter(%)", "jitter")
-    if st.button("Check Parkinson's"):
-        prediction = models['parkinsons'].predict(np.array([[fo, fhi, flo, jitter]]))
-        result = "Parkinson's Detected" if prediction[0] == 1 else "No Parkinson's"
-        st.success(result)
-
-elif selected == "Lung Cancer":
-    st.header("Lung Cancer Prediction")
-    smoking = user_input("Smoking", "smoking", "toggle")
-    coughing = user_input("Coughing", "coughing", "toggle")
-    chest_pain = user_input("Chest Pain", "chest_pain", "toggle")
-    if st.button("Check Lung Cancer"):
-        prediction = models['lung_cancer'].predict(np.array([[smoking, coughing, chest_pain]]))
-        result = "Lung Cancer Detected" if prediction[0] == 1 else "No Lung Cancer"
-        st.success(result)
-
-elif selected == "Thyroid":
-    st.header("Thyroid Disease Prediction")
-    age = user_input("Age", "age", "slider")
-    sex = user_input("Sex (1=Male, 0=Female)", "sex", "toggle")
-    tsh = user_input("TSH Level", "tsh")
-    if st.button("Check Thyroid"):
-        prediction = models['thyroid'].predict(np.array([[age, sex, tsh]]))
-        result = "Thyroid Detected" if prediction[0] == 1 else "No Thyroid Disease"
-        st.success(result)
+        result = make_prediction(models['heart_disease'], [age, sex, cp, trestbps, chol, fbs, thalach, exang])
+        if result is not None:
+            st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
 
 st.markdown("### Stay Healthy 💖")
