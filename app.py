@@ -39,6 +39,7 @@ st.markdown(
 )
 
 # Load models
+
 def load_model(filename):
     if not os.path.exists(filename):
         st.error(f"❌ Model file '{filename}' not found! Please check your repository.")
@@ -73,6 +74,9 @@ def user_input(label, key, type="number"):
 def make_prediction(model, features):
     try:
         input_data = np.array(features).reshape(1, -1)
+        if len(features) != model.n_features_in_:
+            st.error(f"❌ Expected {model.n_features_in_} features, but got {len(features)}!")
+            return None
         prediction = model.predict(input_data)
         return prediction[0]
     except Exception as e:
@@ -145,16 +149,3 @@ elif selected == "Lung Cancer":
     if st.button("Check Lung Cancer"):
         result = make_prediction(models['lung_cancer'], features)
         st.success("Lung Cancer Detected" if result == 1 else "No Lung Cancer")
-
-elif selected == "Thyroid":
-    st.header("Thyroid Disease Prediction")
-    features = [
-        user_input("TSH", "TSH"),
-        user_input("T3", "T3"),
-        user_input("TT4", "TT4"),
-        user_input("T4U", "T4U"),
-        user_input("FTI", "FTI")
-    ]
-    if st.button("Check Thyroid"):
-        result = make_prediction(models['thyroid'], features)
-        st.success("Thyroid Disease Detected" if result == 1 else "No Thyroid Disease")
