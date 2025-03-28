@@ -1,8 +1,8 @@
 import streamlit as st
 import pickle
 import numpy as np
-from streamlit_option_menu import option_menu
 import os
+from streamlit_option_menu import option_menu
 
 # Page Configurations
 st.set_page_config(page_title="Disease Prediction", page_icon="⚕️", layout="wide")
@@ -41,10 +41,11 @@ st.markdown(
 def load_model(filename):
     """Load a model file safely."""
     if not os.path.exists(filename):
-        st.error(f"❌ Model file '{filename}' not found! Please check your GitHub repository.")
+        st.error(f"❌ Model file '{filename}' not found! Please check your repository.")
         st.stop()
     return pickle.load(open(filename, 'rb'))
 
+# Load models
 models = {
     'diabetes': load_model("best_diabetes_model.sav"),
     'heart_disease': load_model("heart_disease_model.sav"),
@@ -53,7 +54,7 @@ models = {
     'thyroid': load_model("Thyroid_model.sav")
 }
 
-# Sidebar for Navigation
+# Sidebar navigation
 with st.sidebar:
     selected = option_menu(
         menu_title="Disease Prediction",
@@ -79,66 +80,86 @@ def make_prediction(model, features):
         st.error(f"Prediction error: {str(e)}")
         return None
 
-if selected == "Parkinson's":
+# Diabetes Prediction
+if selected == "Diabetes":
+    st.header("Diabetes Prediction")
+    features = [
+        user_input("Pregnancies", "Pregnancies"),
+        user_input("Glucose Level", "Glucose"),
+        user_input("Blood Pressure", "BloodPressure"),
+        user_input("Skin Thickness", "SkinThickness"),
+        user_input("Insulin", "Insulin"),
+        user_input("BMI", "BMI"),
+        user_input("Diabetes Pedigree Function", "DiabetesPedigreeFunction"),
+        user_input("Age", "Age")
+    ]
+    if st.button("Check Diabetes"):
+        result = make_prediction(models['diabetes'], features)
+        st.success("Diabetic" if result == 1 else "Not Diabetic")
+
+# Heart Disease Prediction
+elif selected == "Heart Disease":
+    st.header("Heart Disease Prediction")
+    features = [
+        user_input("Age", "age"),
+        user_input("Sex (1=Male, 0=Female)", "sex", "toggle"),
+        user_input("Chest Pain Type (0-3)", "cp"),
+        user_input("Resting Blood Pressure", "trestbps"),
+        user_input("Serum Cholesterol", "chol"),
+        user_input("Fasting Blood Sugar (>120 mg/dl)", "fbs", "toggle"),
+        user_input("Resting ECG Results (0-2)", "restecg"),
+        user_input("Max Heart Rate Achieved", "thalach"),
+        user_input("Exercise Induced Angina", "exang", "toggle"),
+        user_input("ST Depression", "oldpeak"),
+        user_input("Slope of ST Segment", "slope"),
+        user_input("Major Vessels Colored (0-4)", "ca"),
+        user_input("Thalassemia (0-3)", "thal")
+    ]
+    if st.button("Check Heart Disease"):
+        result = make_prediction(models['heart_disease'], features)
+        st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
+
+# Parkinson's Prediction
+elif selected == "Parkinson's":
     st.header("Parkinson's Disease Prediction")
     features = [
-        user_input("MDVP:Fo (Fundamental Frequency)", "MDVP_Fo"),
-        user_input("MDVP:Fhi (Highest Frequency)", "MDVP_Fhi"),
-        user_input("MDVP:Flo (Lowest Frequency)", "MDVP_Flo"),
-        user_input("MDVP:Jitter (%)", "MDVP_Jitter"),
-        user_input("MDVP:Jitter (Abs)", "MDVP_Jitter_Abs"),
-        user_input("MDVP:RAP (Relative Amplitude Perturbation)", "MDVP_RAP"),
-        user_input("MDVP:PPQ (Pitch Period Perturbation Quotient)", "MDVP_PPQ"),
-        user_input("Jitter:DDP", "Jitter_DDP"),
+        user_input("MDVP:Fo", "MDVP_Fo"),
+        user_input("MDVP:Fhi", "MDVP_Fhi"),
+        user_input("MDVP:Flo", "MDVP_Flo"),
+        user_input("MDVP:Jitter", "MDVP_Jitter"),
         user_input("MDVP:Shimmer", "MDVP_Shimmer"),
-        user_input("MDVP:Shimmer (dB)", "MDVP_Shimmer_dB"),
-        user_input("Shimmer:APQ3", "Shimmer_APQ3"),
-        user_input("Shimmer:APQ5", "Shimmer_APQ5"),
-        user_input("MDVP:APQ", "MDVP_APQ"),
-        user_input("Shimmer:DDA", "Shimmer_DDA"),
-        user_input("NHR (Noise-to-Harmonics Ratio)", "NHR"),
-        user_input("HNR (Harmonics-to-Noise Ratio)", "HNR"),
+        user_input("NHR", "NHR"),
+        user_input("HNR", "HNR")
     ]
-    if st.button("Check for Parkinson's Disease"):
+    if st.button("Check Parkinson's"):
         result = make_prediction(models['parkinsons'], features)
-        if result is not None:
-            st.success("Parkinson's Detected" if result == 1 else "No Parkinson's")
+        st.success("Parkinson's Detected" if result == 1 else "No Parkinson's")
 
+# Lung Cancer Prediction
 elif selected == "Lung Cancer":
     st.header("Lung Cancer Prediction")
     features = [
         user_input("Age", "age"),
-        user_input("Gender (1=Male, 0=Female)", "gender", "toggle"),
-        user_input("Air Pollution Exposure", "air_pollution"),
-        user_input("Alcohol Use", "alcohol_use"),
-        user_input("Dust Allergy", "dust_allergy"),
-        user_input("Occasional Coughing", "coughing"),
-        user_input("Smoking History", "smoking"),
-        user_input("Passive Smoking Exposure", "passive_smoking"),
-        user_input("Genetic Risk", "genetic_risk"),
-        user_input("Shortness of Breath", "shortness_breath"),
-        user_input("Frequent Chest Pain", "chest_pain"),
+        user_input("Smoking", "smoking", "toggle"),
+        user_input("Yellow Fingers", "yellow_fingers", "toggle"),
+        user_input("Coughing", "coughing", "toggle"),
+        user_input("Shortness of Breath", "shortness_breath", "toggle"),
+        user_input("Fatigue", "fatigue", "toggle"),
     ]
-    if st.button("Check for Lung Cancer"):
+    if st.button("Check Lung Cancer"):
         result = make_prediction(models['lung_cancer'], features)
-        if result is not None:
-            st.success("Lung Cancer Detected" if result == 1 else "No Lung Cancer")
+        st.success("Lung Cancer Detected" if result == 1 else "No Lung Cancer")
 
+# Thyroid Prediction
 elif selected == "Thyroid":
     st.header("Thyroid Disease Prediction")
     features = [
-        user_input("Age", "age"),
-        user_input("Gender (1=Male, 0=Female)", "gender", "toggle"),
-        user_input("TSH (Thyroid-Stimulating Hormone)", "TSH"),
-        user_input("T3 (Triiodothyronine)", "T3"),
-        user_input("TT4 (Total Thyroxine)", "TT4"),
-        user_input("T4U (Thyroxine Utilization)", "T4U"),
-        user_input("FTI (Free Thyroxine Index)", "FTI"),
-        user_input("On Thyroxine Medication", "on_thyroxine", "toggle"),
-        user_input("Query Hyperthyroid", "query_hyperthyroid", "toggle"),
-        user_input("Query Hypothyroid", "query_hypothyroid", "toggle"),
+        user_input("TSH", "TSH"),
+        user_input("T3", "T3"),
+        user_input("TT4", "TT4"),
+        user_input("T4U", "T4U"),
+        user_input("FTI", "FTI")
     ]
-    if st.button("Check for Thyroid Disease"):
+    if st.button("Check Thyroid"):
         result = make_prediction(models['thyroid'], features)
-        if result is not None:
-            st.success("Thyroid Disease Detected" if result == 1 else "No Thyroid Disease")
+        st.success("Thyroid Disease Detected" if result == 1 else "No Thyroid Disease")
