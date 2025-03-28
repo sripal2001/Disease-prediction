@@ -39,7 +39,6 @@ st.markdown(
 )
 
 def load_model(filename):
-    """Load a model file safely."""
     if not os.path.exists(filename):
         st.error(f"❌ Model file '{filename}' not found! Please check your GitHub repository.")
         st.stop()
@@ -53,7 +52,6 @@ models = {
     'thyroid': load_model("Thyroid_model.sav")
 }
 
-# Sidebar for Navigation
 with st.sidebar:
     selected = option_menu(
         menu_title="Disease Prediction",
@@ -81,45 +79,60 @@ def make_prediction(model, features):
 
 if selected == "Diabetes":
     st.header("Diabetes Prediction")
-    col1, col2 = st.columns(2)
-    with col1:
-        Pregnancies = user_input("Number of Pregnancies", "Pregnancies")
-        Glucose = user_input("Glucose Level", "Glucose")
-        BloodPressure = user_input("Blood Pressure", "BloodPressure")
-        SkinThickness = user_input("Skin Thickness", "SkinThickness")
-    with col2:
-        Insulin = user_input("Insulin Level", "Insulin")
-        BMI = user_input("BMI", "BMI", "slider")
-        DiabetesPedigreeFunction = user_input("Diabetes Pedigree Function", "DiabetesPedigreeFunction")
-        Age = user_input("Age", "Age", "slider")
-    
+    features = [
+        user_input("Number of Pregnancies", "Pregnancies"),
+        user_input("Glucose Level", "Glucose"),
+        user_input("Blood Pressure", "BloodPressure"),
+        user_input("Skin Thickness", "SkinThickness"),
+        user_input("Insulin Level", "Insulin"),
+        user_input("BMI", "BMI", "slider"),
+        user_input("Diabetes Pedigree Function", "DiabetesPedigreeFunction"),
+        user_input("Age", "Age", "slider")
+    ]
     if st.button("Check Diabetes"):
-        result = make_prediction(models['diabetes'], [Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age])
-        if result is not None:
-            st.success("Diabetic" if result == 1 else "Not Diabetic")
+        result = make_prediction(models['diabetes'], features)
+        st.success("Diabetic" if result == 1 else "Not Diabetic")
 
 elif selected == "Heart Disease":
     st.header("Heart Disease Prediction")
-    col1, col2 = st.columns(2)
-    with col1:
-        age = user_input("Age", "age", "slider")
-        sex = user_input("Sex (1=Male, 0=Female)", "sex", "toggle")
-        cp = user_input("Chest Pain Type (0-3)", "cp")
-        trestbps = user_input("Resting Blood Pressure", "trestbps")
-        restecg = user_input("Resting ECG Results (0-2)", "restecg")
-    with col2:
-        chol = user_input("Serum Cholesterol (mg/dl)", "chol")
-        fbs = user_input("Fasting Blood Sugar > 120 mg/dl", "fbs", "toggle")
-        thalach = user_input("Max Heart Rate Achieved", "thalach")
-        exang = user_input("Exercise Induced Angina", "exang", "toggle")
-        oldpeak = user_input("ST Depression Induced by Exercise", "oldpeak")
-        slope = user_input("Slope of Peak Exercise ST Segment (0-2)", "slope")
-        ca = user_input("Number of Major Vessels Colored by Fluoroscopy (0-4)", "ca")
-        thal = user_input("Thalassemia (0-3)", "thal")
-    
+    features = [
+        user_input("Age", "age", "slider"),
+        user_input("Sex (1=Male, 0=Female)", "sex", "toggle"),
+        user_input("Chest Pain Type (0-3)", "cp"),
+        user_input("Resting Blood Pressure", "trestbps"),
+        user_input("Serum Cholesterol (mg/dl)", "chol"),
+        user_input("Fasting Blood Sugar > 120 mg/dl", "fbs", "toggle"),
+        user_input("Resting ECG Results (0-2)", "restecg"),
+        user_input("Max Heart Rate Achieved", "thalach"),
+        user_input("Exercise Induced Angina", "exang", "toggle"),
+        user_input("ST Depression Induced by Exercise", "oldpeak"),
+        user_input("Slope of Peak Exercise ST Segment (0-2)", "slope"),
+        user_input("Number of Major Vessels Colored by Fluoroscopy (0-4)", "ca"),
+        user_input("Thalassemia (0-3)", "thal")
+    ]
     if st.button("Check Heart Disease"):
-        result = make_prediction(models['heart_disease'], [age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal])
-        if result is not None:
-            st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
+        result = make_prediction(models['heart_disease'], features)
+        st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
+
+elif selected == "Parkinson's":
+    st.header("Parkinson's Disease Prediction")
+    features = [user_input(f"Feature {i+1}", f"parkinson_{i+1}") for i in range(22)]
+    if st.button("Check Parkinson's"):
+        result = make_prediction(models['parkinsons'], features)
+        st.success("Parkinson's Detected" if result == 1 else "No Parkinson's")
+
+elif selected == "Lung Cancer":
+    st.header("Lung Cancer Prediction")
+    features = [user_input(f"Feature {i+1}", f"lung_cancer_{i+1}") for i in range(10)]
+    if st.button("Check Lung Cancer"):
+        result = make_prediction(models['lung_cancer'], features)
+        st.success("Lung Cancer Detected" if result == 1 else "No Lung Cancer")
+
+elif selected == "Thyroid":
+    st.header("Thyroid Disease Prediction")
+    features = [user_input(f"Feature {i+1}", f"thyroid_{i+1}") for i in range(7)]
+    if st.button("Check Thyroid"):
+        result = make_prediction(models['thyroid'], features)
+        st.success("Thyroid Issue Detected" if result == 1 else "No Thyroid Issue")
 
 st.markdown("### Stay Healthy 💖")
