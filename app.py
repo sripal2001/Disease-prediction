@@ -1,7 +1,8 @@
 import streamlit as st
 import pickle
-from streamlit_option_menu import option_menu
 import numpy as np
+from streamlit_option_menu import option_menu
+import os
 
 # Page Configurations
 st.set_page_config(page_title="Disease Prediction", page_icon="⚕️", layout="wide")
@@ -37,8 +38,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-import os
-
 def load_model(filename):
     """Load a model file safely."""
     if not os.path.exists(filename):
@@ -53,6 +52,7 @@ models = {
     'lung_cancer': load_model("lungs_disease_model.sav"),
     'thyroid': load_model("Thyroid_model.sav")
 }
+
 # Sidebar for Navigation
 with st.sidebar:
     selected = option_menu(
@@ -63,15 +63,13 @@ with st.sidebar:
         default_index=0,
     )
 
-# Function to create UI Components
 def user_input(label, key, type="number"):
     if type == "toggle":
-        return st.toggle(label, key=key)
+        return int(st.toggle(label, key=key))
     elif type == "slider":
-        return st.slider(label, 0, 100, step=1, key=key)
-    return st.number_input(label, step=1, key=key)
+        return int(st.slider(label, 0, 100, step=1, key=key))
+    return float(st.number_input(label, step=1.0, key=key))
 
-# Prediction Logic
 if selected == "Diabetes":
     st.header("Diabetes Prediction")
     col1, col2 = st.columns(2)
@@ -87,7 +85,7 @@ if selected == "Diabetes":
         Age = user_input("Age", "Age", "slider")
     
     if st.button("Check Diabetes"):
-        prediction = models['diabetes'].predict([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]])
+        prediction = models['diabetes'].predict(np.array([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]]))
         result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
         st.success(result)
 
@@ -106,7 +104,7 @@ elif selected == "Heart Disease":
         exang = user_input("Exercise Induced Angina", "exang", "toggle")
     
     if st.button("Check Heart Disease"):
-        prediction = models['heart_disease'].predict([[age, sex, cp, trestbps, chol, fbs, thalach, exang]])
+        prediction = models['heart_disease'].predict(np.array([[age, sex, cp, trestbps, chol, fbs, thalach, exang]]))
         result = "Heart Disease Detected" if prediction[0] == 1 else "No Heart Disease"
         st.success(result)
 
@@ -117,7 +115,7 @@ elif selected == "Parkinson's":
     flo = user_input("MDVP:Flo(Hz)", "flo")
     jitter = user_input("MDVP:Jitter(%)", "jitter")
     if st.button("Check Parkinson's"):
-        prediction = models['parkinsons'].predict([[fo, fhi, flo, jitter]])
+        prediction = models['parkinsons'].predict(np.array([[fo, fhi, flo, jitter]]))
         result = "Parkinson's Detected" if prediction[0] == 1 else "No Parkinson's"
         st.success(result)
 
@@ -127,7 +125,7 @@ elif selected == "Lung Cancer":
     coughing = user_input("Coughing", "coughing", "toggle")
     chest_pain = user_input("Chest Pain", "chest_pain", "toggle")
     if st.button("Check Lung Cancer"):
-        prediction = models['lung_cancer'].predict([[smoking, coughing, chest_pain]])
+        prediction = models['lung_cancer'].predict(np.array([[smoking, coughing, chest_pain]]))
         result = "Lung Cancer Detected" if prediction[0] == 1 else "No Lung Cancer"
         st.success(result)
 
@@ -137,7 +135,7 @@ elif selected == "Thyroid":
     sex = user_input("Sex (1=Male, 0=Female)", "sex", "toggle")
     tsh = user_input("TSH Level", "tsh")
     if st.button("Check Thyroid"):
-        prediction = models['thyroid'].predict([[age, sex, tsh]])
+        prediction = models['thyroid'].predict(np.array([[age, sex, tsh]]))
         result = "Thyroid Detected" if prediction[0] == 1 else "No Thyroid Disease"
         st.success(result)
 
