@@ -10,7 +10,7 @@ st.set_page_config(page_title="Disease Prediction", page_icon="⚕️", layout="
 # Load models
 def load_model(filename):
     if not os.path.exists(filename):
-        st.error(f"\u274c Model file '{filename}' not found! Please check your repository.")
+        st.error(f"❌ Model file '{filename}' not found! Please check your repository.")
         st.stop()
     return pickle.load(open(filename, 'rb'))
 
@@ -43,7 +43,7 @@ def make_prediction(model, features):
     try:
         input_data = np.array(features).reshape(1, -1)
         if len(features) != model.n_features_in_:
-            st.error(f"\u274c Expected {model.n_features_in_} features, but got {len(features)}!")
+            st.error(f"❌ Expected {model.n_features_in_} features, but got {len(features)}!")
             return None
         prediction = model.predict(input_data)
         return prediction[0]
@@ -51,55 +51,17 @@ def make_prediction(model, features):
         st.error(f"Prediction error: {str(e)}")
         return None
 
-# Diabetes Prediction
-if selected == "Diabetes":
-    st.header("Diabetes Prediction")
-    features = [
-        user_input("Pregnancies", "Pregnancies"),
-        user_input("Glucose Level", "Glucose"),
-        user_input("Blood Pressure", "BloodPressure"),
-        user_input("Skin Thickness", "SkinThickness"),
-        user_input("Insulin", "Insulin"),
-        user_input("BMI", "BMI"),
-        user_input("Diabetes Pedigree Function", "DiabetesPedigreeFunction"),
-        user_input("Age", "Age")
-    ]
-    if st.button("Check Diabetes"):
-        result = make_prediction(models['diabetes'], features)
-        st.success("Diabetic" if result == 1 else "Not Diabetic")
-
 # Thyroid Prediction
-elif selected == "Thyroid":
+if selected == "Thyroid":
     st.header("Thyroid Disease Prediction")
     features = [
         user_input("Age", "age"),
         user_input("Sex (1=Male, 0=Female)", "sex", "toggle"),
-        user_input("On Thyroxine", "on thyroxine", "toggle"),
-        user_input("Query on Thyroxine", "query on thyroxine", "toggle"),
-        user_input("On Antithyroid Medication", "on antithyroid medication", "toggle"),
-        user_input("Sick", "sick", "toggle"),
-        user_input("Pregnant", "pregnant", "toggle"),
-        user_input("Thyroid Surgery", "thyroid surgery", "toggle"),
-        user_input("I131 Treatment", "I131 treatment", "toggle"),
-        user_input("Query Hypothyroid", "query hypothyroid", "toggle"),
-        user_input("Query Hyperthyroid", "query hyperthyroid", "toggle"),
-        user_input("Lithium", "lithium", "toggle"),
-        user_input("Goitre", "goitre", "toggle"),
-        user_input("Tumor", "tumor", "toggle"),
-        user_input("Hypopituitary", "hypopituitary", "toggle"),
-        user_input("Psych", "psych", "toggle"),
-        user_input("TSH Measured", "TSH measured", "toggle"),
-        user_input("TSH", "TSH"),
-        user_input("T3 Measured", "T3 measured", "toggle"),
-        user_input("T3", "T3"),
-        user_input("TT4 Measured", "TT4 measured", "toggle"),
-        user_input("TT4", "TT4"),
-        user_input("T4U Measured", "T4U measured", "toggle"),
-        user_input("T4U", "T4U"),
-        user_input("FTI Measured", "FTI measured", "toggle"),
-        user_input("FTI", "FTI"),
-        user_input("TBG Measured", "TBG measured", "toggle"),
-        user_input("TBG", "TBG"),
+        user_input("On Thyroxine (1=Yes, 0=No)", "on_thyroxine", "toggle"),
+        user_input("TSH Level", "TSH"),
+        user_input("T3 Measured (1=Yes, 0=No)", "T3_measured", "toggle"),
+        user_input("T3 Level", "T3"),
+        user_input("TT4 Level", "TT4")
     ]
     if st.button("Check Thyroid"):
         result = make_prediction(models['thyroid'], features)
