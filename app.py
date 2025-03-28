@@ -10,7 +10,7 @@ st.set_page_config(page_title="Disease Prediction", page_icon="⚕️", layout="
 # Load models
 def load_model(filename):
     if not os.path.exists(filename):
-        st.error(f"❌ Model file '{filename}' not found! Please check your repository.")
+        st.error(f"\u274c Model file '{filename}' not found! Please check your repository.")
         st.stop()
     return pickle.load(open(filename, 'rb'))
 
@@ -43,7 +43,7 @@ def make_prediction(model, features):
     try:
         input_data = np.array(features).reshape(1, -1)
         if len(features) != model.n_features_in_:
-            st.error(f"❌ Expected {model.n_features_in_} features, but got {len(features)}!")
+            st.error(f"\u274c Expected {model.n_features_in_} features, but got {len(features)}!")
             return None
         prediction = model.predict(input_data)
         return prediction[0]
@@ -68,61 +68,38 @@ if selected == "Diabetes":
         result = make_prediction(models['diabetes'], features)
         st.success("Diabetic" if result == 1 else "Not Diabetic")
 
-# Heart Disease Prediction
-elif selected == "Heart Disease":
-    st.header("Heart Disease Prediction")
-    features = [
-        user_input("Age", "age"),
-        user_input("Sex (1=Male, 0=Female)", "sex", "toggle"),
-        user_input("Chest Pain Type (0-3)", "cp"),
-        user_input("Resting Blood Pressure", "trestbps"),
-        user_input("Serum Cholesterol", "chol"),
-        user_input("Fasting Blood Sugar (>120 mg/dl)", "fbs", "toggle"),
-        user_input("Resting ECG Results (0-2)", "restecg"),
-        user_input("Max Heart Rate Achieved", "thalach"),
-        user_input("Exercise Induced Angina", "exang", "toggle"),
-        user_input("ST Depression", "oldpeak"),
-        user_input("Slope of ST Segment", "slope"),
-        user_input("Major Vessels Colored (0-4)", "ca"),
-        user_input("Thalassemia (0-3)", "thal")
-    ]
-    if st.button("Check Heart Disease"):
-        result = make_prediction(models['heart_disease'], features)
-        st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
-
-# Parkinson's Prediction
-elif selected == "Parkinson's":
-    st.header("Parkinson's Disease Prediction")
-    features = [
-        user_input(col, col) for col in [
-            'MDVP:Fo(Hz)', 'MDVP:Fhi(Hz)', 'MDVP:Flo(Hz)', 'MDVP:Jitter(%)', 'MDVP:Jitter(Abs)', 'MDVP:RAP', 
-            'MDVP:PPQ', 'Jitter:DDP', 'MDVP:Shimmer', 'MDVP:Shimmer(dB)', 'Shimmer:APQ3', 'Shimmer:APQ5', 
-            'MDVP:APQ', 'Shimmer:DDA', 'NHR', 'HNR', 'RPDE', 'DFA', 'spread1', 'spread2', 'D2', 'PPE'
-        ]
-    ]
-    if st.button("Check Parkinson's"):
-        result = make_prediction(models['parkinsons'], features)
-        st.success("Parkinson's Detected" if result == 1 else "No Parkinson's")
-
-# Lung Cancer Prediction
-elif selected == "Lung Cancer":
-    st.header("Lung Cancer Prediction")
-    features = [
-        user_input(col, col, "toggle") for col in [
-            'GENDER', 'AGE', 'SMOKING', 'YELLOW_FINGERS', 'ANXIETY', 'PEER_PRESSURE', 'CHRONIC DISEASE',
-            'FATIGUE ', 'ALLERGY ', 'WHEEZING', 'ALCOHOL CONSUMING', 'COUGHING', 'SHORTNESS OF BREATH',
-            'SWALLOWING DIFFICULTY', 'CHEST PAIN'
-        ]
-    ]
-    if st.button("Check Lung Cancer"):
-        result = make_prediction(models['lung_cancer'], features)
-        st.success("Lung Cancer Detected" if result == 1 else "No Lung Cancer")
-
 # Thyroid Prediction
 elif selected == "Thyroid":
     st.header("Thyroid Disease Prediction")
     features = [
-        user_input(col, col) for col in file_paths['thyroid'].columns[:-1]
+        user_input("Age", "age"),
+        user_input("Sex (1=Male, 0=Female)", "sex", "toggle"),
+        user_input("On Thyroxine", "on thyroxine", "toggle"),
+        user_input("Query on Thyroxine", "query on thyroxine", "toggle"),
+        user_input("On Antithyroid Medication", "on antithyroid medication", "toggle"),
+        user_input("Sick", "sick", "toggle"),
+        user_input("Pregnant", "pregnant", "toggle"),
+        user_input("Thyroid Surgery", "thyroid surgery", "toggle"),
+        user_input("I131 Treatment", "I131 treatment", "toggle"),
+        user_input("Query Hypothyroid", "query hypothyroid", "toggle"),
+        user_input("Query Hyperthyroid", "query hyperthyroid", "toggle"),
+        user_input("Lithium", "lithium", "toggle"),
+        user_input("Goitre", "goitre", "toggle"),
+        user_input("Tumor", "tumor", "toggle"),
+        user_input("Hypopituitary", "hypopituitary", "toggle"),
+        user_input("Psych", "psych", "toggle"),
+        user_input("TSH Measured", "TSH measured", "toggle"),
+        user_input("TSH", "TSH"),
+        user_input("T3 Measured", "T3 measured", "toggle"),
+        user_input("T3", "T3"),
+        user_input("TT4 Measured", "TT4 measured", "toggle"),
+        user_input("TT4", "TT4"),
+        user_input("T4U Measured", "T4U measured", "toggle"),
+        user_input("T4U", "T4U"),
+        user_input("FTI Measured", "FTI measured", "toggle"),
+        user_input("FTI", "FTI"),
+        user_input("TBG Measured", "TBG measured", "toggle"),
+        user_input("TBG", "TBG"),
     ]
     if st.button("Check Thyroid"):
         result = make_prediction(models['thyroid'], features)
