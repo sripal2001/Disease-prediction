@@ -5,7 +5,7 @@ from streamlit_option_menu import option_menu
 import os
 
 # Page Configurations
-st.set_page_config(page_title="Disease Prediction", page_icon="\u2695\ufe0f", layout="wide")
+st.set_page_config(page_title="Disease Prediction", page_icon="⚕️", layout="wide")
 
 # Hide Streamlit branding
 st.markdown(
@@ -73,7 +73,6 @@ def user_input(label, key, type="number"):
 def make_prediction(model, features):
     try:
         input_data = np.array(features).reshape(1, -1)
-        st.write(f"Input Shape: {input_data.shape}")  # Debugging
         prediction = model.predict(input_data)
         return prediction[0]
     except Exception as e:
@@ -107,14 +106,19 @@ elif selected == "Heart Disease":
         sex = user_input("Sex (1=Male, 0=Female)", "sex", "toggle")
         cp = user_input("Chest Pain Type (0-3)", "cp")
         trestbps = user_input("Resting Blood Pressure", "trestbps")
+        restecg = user_input("Resting ECG Results (0-2)", "restecg")
     with col2:
         chol = user_input("Serum Cholesterol (mg/dl)", "chol")
         fbs = user_input("Fasting Blood Sugar > 120 mg/dl", "fbs", "toggle")
         thalach = user_input("Max Heart Rate Achieved", "thalach")
         exang = user_input("Exercise Induced Angina", "exang", "toggle")
+        oldpeak = user_input("ST Depression Induced by Exercise", "oldpeak")
+        slope = user_input("Slope of Peak Exercise ST Segment (0-2)", "slope")
+        ca = user_input("Number of Major Vessels Colored by Fluoroscopy (0-4)", "ca")
+        thal = user_input("Thalassemia (0-3)", "thal")
     
     if st.button("Check Heart Disease"):
-        result = make_prediction(models['heart_disease'], [age, sex, cp, trestbps, chol, fbs, thalach, exang])
+        result = make_prediction(models['heart_disease'], [age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal])
         if result is not None:
             st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
 
