@@ -8,19 +8,10 @@ from streamlit_option_menu import option_menu
 # Page Configurations
 st.set_page_config(page_title="Disease Prediction", page_icon="⚕️", layout="wide")
 
-# File Paths
-file_paths = {
-    'diabetes': "/mnt/data/diabetes_data.csv",
-    'heart_disease': "/mnt/data/heart_disease_data.csv",
-    'parkinsons': "/mnt/data/parkinson_data.csv",
-    'lung_cancer': "/mnt/data/survey lung cancer.csv",
-    'thyroid': "/mnt/data/hypothyroid.csv"
-}
-
 # Load models
 def load_model(filename):
     if not os.path.exists(filename):
-        st.error(f"\u274c Model file '{filename}' not found! Please check your repository.")
+        st.error(f"❌ Model file '{filename}' not found! Please check your repository.")
         st.stop()
     return pickle.load(open(filename, 'rb'))
 
@@ -33,13 +24,21 @@ models = {
 }
 
 # Load datasets to determine feature names
+data_files = {
+    'diabetes': "/mnt/data/diabetes_data.csv",
+    'heart_disease': "/mnt/data/heart_disease_data.csv",
+    'parkinsons': "/mnt/data/parkinson_data.csv",
+    'lung_cancer': "/mnt/data/survey lung cancer.csv",
+    'thyroid': "/mnt/data/hypothyroid.csv"
+}
+
 data_columns = {}
-for disease, path in file_paths.items():
-    if os.path.exists(path):
-        df = pd.read_csv(path)
+for disease, file in data_files.items():
+    if os.path.exists(file):
+        df = pd.read_csv(file)
         data_columns[disease] = df.columns[:-1].tolist()  # Exclude target column
     else:
-        st.error(f"\u274c Data file '{path}' not found!")
+        st.error(f"❌ Data file '{file}' not found!")
         st.stop()
 
 # Sidebar Navigation
@@ -52,16 +51,18 @@ with st.sidebar:
         default_index=0,
     )
 
+# Function to take user input
 def user_input(label, key, type="number"):
     if type == "toggle":
         return int(st.toggle(label, key=key))
     return float(st.number_input(label, step=1.0, key=key))
 
+# Function to make predictions
 def make_prediction(model, features):
     try:
         input_data = np.array(features).reshape(1, -1)
         if len(features) != model.n_features_in_:
-            st.error(f"\u274c Expected {model.n_features_in_} features, but got {len(features)}!")
+            st.error(f"❌ Expected {model.n_features_in_} features, but got {len(features)}!")
             return None
         prediction = model.predict(input_data)
         return prediction[0]
@@ -69,15 +70,14 @@ def make_prediction(model, features):
         st.error(f"Prediction error: {str(e)}")
         return None
 
-# Prediction logic
-selected_key = selected.lower().replace(" ", "_")
+# Prediction logic based on selected disease
 st.header(f"{selected} Prediction")
 
 features = [
     user_input(col, col, "toggle" if "Yes/No" in col or "0/1" in col else "number")
-    for col in data_columns[selected_key]
+    for col in data_columns[selected.lower().replace(" ", "_")]
 ]
 
 if st.button(f"Check {selected}"):
-    result = make_prediction(models[selected_key], features)
+    result = make_prediction(models[selected.lower().replace(" ", "_")], features)
     st.success(f"{selected} Detected" if result == 1 else f"No {selected}")
