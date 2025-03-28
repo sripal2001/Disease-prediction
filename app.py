@@ -7,39 +7,7 @@ from streamlit_option_menu import option_menu
 # Page Configurations
 st.set_page_config(page_title="Disease Prediction", page_icon="⚕️", layout="wide")
 
-# Hide Streamlit branding
-st.markdown(
-    """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-        color: white;
-    }
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 24px;
-        font-size: 16px;
-        border-radius: 10px;
-        transition: 0.3s;
-    }
-    .stButton>button:hover {
-        background-color: #45a049;
-    }
-    .stTextInput>div>div>input {
-        border-radius: 10px;
-        padding: 10px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Load models
-
 def load_model(filename):
     if not os.path.exists(filename):
         st.error(f"❌ Model file '{filename}' not found! Please check your repository.")
@@ -54,7 +22,7 @@ models = {
     'thyroid': load_model("Thyroid_model.sav")
 }
 
-# Sidebar navigation
+# Sidebar Navigation
 with st.sidebar:
     selected = option_menu(
         menu_title="Disease Prediction",
@@ -64,7 +32,7 @@ with st.sidebar:
         default_index=0,
     )
 
-# Function for user inputs
+# Function to take user input
 def user_input(label, key, type="number"):
     if type == "toggle":
         return int(st.toggle(label, key=key))
@@ -83,7 +51,7 @@ def make_prediction(model, features):
         st.error(f"Prediction error: {str(e)}")
         return None
 
-# Disease Prediction Sections
+# Diabetes Prediction
 if selected == "Diabetes":
     st.header("Diabetes Prediction")
     features = [
@@ -100,6 +68,7 @@ if selected == "Diabetes":
         result = make_prediction(models['diabetes'], features)
         st.success("Diabetic" if result == 1 else "Not Diabetic")
 
+# Heart Disease Prediction
 elif selected == "Heart Disease":
     st.header("Heart Disease Prediction")
     features = [
@@ -121,31 +90,40 @@ elif selected == "Heart Disease":
         result = make_prediction(models['heart_disease'], features)
         st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
 
+# Parkinson's Prediction
 elif selected == "Parkinson's":
     st.header("Parkinson's Disease Prediction")
     features = [
-        user_input("MDVP:Fo", "MDVP_Fo"),
-        user_input("MDVP:Fhi", "MDVP_Fhi"),
-        user_input("MDVP:Flo", "MDVP_Flo"),
-        user_input("MDVP:Jitter", "MDVP_Jitter"),
-        user_input("MDVP:Shimmer", "MDVP_Shimmer"),
-        user_input("NHR", "NHR"),
-        user_input("HNR", "HNR")
+        user_input(col, col) for col in [
+            'MDVP:Fo(Hz)', 'MDVP:Fhi(Hz)', 'MDVP:Flo(Hz)', 'MDVP:Jitter(%)', 'MDVP:Jitter(Abs)', 'MDVP:RAP', 
+            'MDVP:PPQ', 'Jitter:DDP', 'MDVP:Shimmer', 'MDVP:Shimmer(dB)', 'Shimmer:APQ3', 'Shimmer:APQ5', 
+            'MDVP:APQ', 'Shimmer:DDA', 'NHR', 'HNR', 'RPDE', 'DFA', 'spread1', 'spread2', 'D2', 'PPE'
+        ]
     ]
     if st.button("Check Parkinson's"):
         result = make_prediction(models['parkinsons'], features)
         st.success("Parkinson's Detected" if result == 1 else "No Parkinson's")
 
+# Lung Cancer Prediction
 elif selected == "Lung Cancer":
     st.header("Lung Cancer Prediction")
     features = [
-        user_input("Age", "age"),
-        user_input("Smoking", "smoking", "toggle"),
-        user_input("Yellow Fingers", "yellow_fingers", "toggle"),
-        user_input("Coughing", "coughing", "toggle"),
-        user_input("Shortness of Breath", "shortness_breath", "toggle"),
-        user_input("Fatigue", "fatigue", "toggle"),
+        user_input(col, col, "toggle") for col in [
+            'GENDER', 'AGE', 'SMOKING', 'YELLOW_FINGERS', 'ANXIETY', 'PEER_PRESSURE', 'CHRONIC DISEASE',
+            'FATIGUE ', 'ALLERGY ', 'WHEEZING', 'ALCOHOL CONSUMING', 'COUGHING', 'SHORTNESS OF BREATH',
+            'SWALLOWING DIFFICULTY', 'CHEST PAIN'
+        ]
     ]
     if st.button("Check Lung Cancer"):
         result = make_prediction(models['lung_cancer'], features)
         st.success("Lung Cancer Detected" if result == 1 else "No Lung Cancer")
+
+# Thyroid Prediction
+elif selected == "Thyroid":
+    st.header("Thyroid Disease Prediction")
+    features = [
+        user_input(col, col) for col in file_paths['thyroid'].columns[:-1]
+    ]
+    if st.button("Check Thyroid"):
+        result = make_prediction(models['thyroid'], features)
+        st.success("Thyroid Disease Detected" if result == 1 else "No Thyroid Disease")
