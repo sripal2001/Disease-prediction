@@ -2,6 +2,7 @@ import streamlit as st
 import pickle
 import numpy as np
 import os
+import pandas as pd
 from streamlit_option_menu import option_menu
 
 # Page Configurations
@@ -22,6 +23,24 @@ models = {
     'thyroid': load_model("Thyroid_model.sav")
 }
 
+# Load datasets to determine feature names
+data_files = {
+    'diabetes': "diabetes_data.csv",
+    'heart_disease': "heart_disease_data.csv",
+    'parkinsons': "parkinson_data.csv",
+    'lung_cancer': "survey_lung_cancer.csv",  # Fixed file name
+    'thyroid': "hypothyroid.csv"
+}
+
+data_columns = {}
+for disease, file in data_files.items():
+    if os.path.exists(file):
+        df = pd.read_csv(file)
+        data_columns[disease] = df.columns[:-1].tolist()  # Exclude target column
+    else:
+        st.error(f"❌ Data file '{file}' not found!")
+        st.stop()
+
 # Sidebar Navigation
 with st.sidebar:
     selected = option_menu(
@@ -33,8 +52,8 @@ with st.sidebar:
     )
 
 # Function to take user input
-def user_input(label, key, type="number"):
-    if type == "toggle":
+def user_input(label, key):
+    if "Yes" in label or "No" in label or "0/1" in label or "binary" in label.lower():
         return int(st.toggle(label, key=key))
     return float(st.number_input(label, step=1.0, key=key))
 
@@ -51,79 +70,25 @@ def make_prediction(model, features):
         st.error(f"Prediction error: {str(e)}")
         return None
 
-# Diabetes Prediction
-if selected == "Diabetes":
-    st.header("Diabetes Prediction")
-    features = [
-        user_input("Pregnancies", "Pregnancies"),
-        user_input("Glucose Level", "Glucose"),
-        user_input("Blood Pressure", "BloodPressure"),
-        user_input("Skin Thickness", "SkinThickness"),
-        user_input("Insulin", "Insulin"),
-        user_input("BMI", "BMI"),
-        user_input("Diabetes Pedigree Function", "DiabetesPedigreeFunction"),
-        user_input("Age", "Age")
-    ]
-    if st.button("Check Diabetes"):
-        result = make_prediction(models['diabetes'], features)
-        st.success("Diabetic" if result == 1 else "Not Diabetic")
+# Get the correct dataset key (lowercase, no spaces)
+selected_key = selected.lower().replace(" ", "_")
+if selected_key == "heart_disease":
+    selected_key = "heart_disease"
+elif selected_key == "lung_cancer":
+    selected_key = "lung_cancer"
+elif selected_key == "parkinsons":
+    selected_key = "parkinsons"
+elif selected_key == "thyroid":
+    selected_key = "thyroid"
 
-# Heart Disease Prediction
-elif selected == "Heart Disease":
-    st.header("Heart Disease Prediction")
-    features = [
-        user_input("Age", "age"),
-        user_input("Sex (1=Male, 0=Female)", "sex", "toggle"),
-        user_input("Chest Pain Type (0-3)", "cp"),
-        user_input("Resting Blood Pressure", "trestbps"),
-        user_input("Serum Cholesterol", "chol"),
-        user_input("Fasting Blood Sugar (>120 mg/dl)", "fbs", "toggle"),
-        user_input("Resting ECG Results (0-2)", "restecg"),
-        user_input("Max Heart Rate Achieved", "thalach"),
-        user_input("Exercise Induced Angina", "exang", "toggle"),
-        user_input("ST Depression", "oldpeak"),
-        user_input("Slope of ST Segment", "slope"),
-        user_input("Major Vessels Colored (0-4)", "ca"),
-        user_input("Thalassemia (0-3)", "thal")
-    ]
-    if st.button("Check Heart Disease"):
-        result = make_prediction(models['heart_disease'], features)
-        st.success("Heart Disease Detected" if result == 1 else "No Heart Disease")
+# Prediction logic based on selected disease
+st.header(f"{selected} Prediction")
 
-# Parkinson's Prediction
-elif selected == "Parkinson's":
-    st.header("Parkinson's Disease Prediction")
-    features = [
-        user_input(col, col) for col in [
-            'MDVP:Fo(Hz)', 'MDVP:Fhi(Hz)', 'MDVP:Flo(Hz)', 'MDVP:Jitter(%)', 'MDVP:Jitter(Abs)', 'MDVP:RAP', 
-            'MDVP:PPQ', 'Jitter:DDP', 'MDVP:Shimmer', 'MDVP:Shimmer(dB)', 'Shimmer:APQ3', 'Shimmer:APQ5', 
-            'MDVP:APQ', 'Shimmer:DDA', 'NHR', 'HNR', 'RPDE', 'DFA', 'spread1', 'spread2', 'D2', 'PPE'
-        ]
-    ]
-    if st.button("Check Parkinson's"):
-        result = make_prediction(models['parkinsons'], features)
-        st.success("Parkinson's Detected" if result == 1 else "No Parkinson's")
+if selected_key in data_columns:
+    features = [user_input(col, col) for col in data_columns[selected_key]]
 
-# Lung Cancer Prediction
-elif selected == "Lung Cancer":
-    st.header("Lung Cancer Prediction")
-    features = [
-        user_input(col, col, "toggle") for col in [
-            'GENDER', 'AGE', 'SMOKING', 'YELLOW_FINGERS', 'ANXIETY', 'PEER_PRESSURE', 'CHRONIC DISEASE',
-            'FATIGUE ', 'ALLERGY ', 'WHEEZING', 'ALCOHOL CONSUMING', 'COUGHING', 'SHORTNESS OF BREATH',
-            'SWALLOWING DIFFICULTY', 'CHEST PAIN'
-        ]
-    ]
-    if st.button("Check Lung Cancer"):
-        result = make_prediction(models['lung_cancer'], features)
-        st.success("Lung Cancer Detected" if result == 1 else "No Lung Cancer")
-
-# Thyroid Prediction
-elif selected == "Thyroid":
-    st.header("Thyroid Disease Prediction")
-    features = [
-        user_input(col, col) for col in file_paths['thyroid'].columns[:-1]
-    ]
-    if st.button("Check Thyroid"):
-        result = make_prediction(models['thyroid'], features)
-        st.success("Thyroid Disease Detected" if result == 1 else "No Thyroid Disease")
+    if st.button(f"Check {selected}"):
+        result = make_prediction(models[selected_key], features)
+        st.success(f"{selected} Detected" if result == 1 else f"No {selected}")
+else:
+    st.error("❌ Dataset not found for this prediction.")
